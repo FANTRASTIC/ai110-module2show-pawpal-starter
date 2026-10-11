@@ -171,7 +171,6 @@ AI-assisted assessment, not the student's personal rating or an official grade.
 
 [reflection.md](reflection.md) preserves the original questions and student notes,
 adds factual implementation evidence, and labels proposed personal answers for review.
-[grading_audit.md](grading_audit.md) maps the six rubric categories to evidence.
 
 Before submission, review the reflection draft and perform the browser walkthrough.
 The intended repository is
