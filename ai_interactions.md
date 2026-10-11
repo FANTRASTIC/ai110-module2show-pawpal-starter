@@ -10,15 +10,15 @@
 
 **What task did you give the agent?**
 
-<!-- Describe the goal you asked the agent to accomplish -->
+Asked the agent to review my class relationships, help debug recurring tasks, and troubleshoot Streamlit session-state issues after my initial implementation. I would also ask it to suggest edge cases my tests might have missed.
 
 **What did the agent do?**
 
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
+The agent would review my code, explain potential problems, and suggest focused changes. Its assistance would include checking recurrence date calculations, preventing duplicate occurrences, and helping keep pets and tasks available across Streamlit reruns.
 
 **What did you have to verify or fix manually?**
 
-<!-- Describe anything the agent got wrong or that required human review -->
+I would run the tests and CLI, check that completing daily and weekly tasks created the correct next occurrence, and test the interface for sorting, filtering, conflicts, and persistence. I would also compare the UML and documentation with the final code and make sure I understood every suggested change before accepting it.
 
 ---
 
@@ -37,4 +37,4 @@
 
 **Which approach did you use in your final implementation and why?**
 
-<!-- Your conclusion -->
+I used a focused, step-by-step approach: implement the core classes myself, then asked AI for help with specific issues such as recurrence and Streamlit session state. I accepted suggestions that kept the code readable and matched the assignment requirements, then verify them through tests and interface checks. I chose this approach because it would let me understand and maintain the final implementation while using AI to resolve problems and identify overlooked edge cases.

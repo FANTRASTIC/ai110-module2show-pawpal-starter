@@ -1,4 +1,4 @@
-﻿# PawPal+ (CodePath AI110 Project 2)
+# PawPal+ (CodePath AI110 Project 2)
 
 PawPal+ is a Python pet-care scheduler with a Streamlit interface and a reproducible
 CLI demonstration. One owner can manage multiple pets, schedule and edit care
@@ -166,15 +166,3 @@ AI-assisted assessment, not the student's personal rating or an official grade.
    follows the same workflow and advances seven days.
 10. Use **Edit a pending task** to change a title, date, time, duration, priority,
     or frequency. Blank titles produce an error and preserve the existing task.
-
-## Reflection and submission
-
-[reflection.md](reflection.md) preserves the original questions and student notes,
-adds factual implementation evidence, and labels proposed personal answers for review.
-
-Before submission, review the reflection draft and perform the browser walkthrough.
-The intended repository is
-[FANTRASTIC/ai110-module2show-pawpal-starter](https://github.com/FANTRASTIC/ai110-module2show-pawpal-starter);
-GitHub's repository API confirmed that it is public. Submit through CodePath's
-Week 5 interface yourself. No assignment submission has been performed.
-Bonus criteria were not supplied, so no bonus score is claimed.
