@@ -6,18 +6,18 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
+- 
     I want Paw Pal+ users to add and manage multiple pets under an owner
     Have different activities succh as feeding, walking medication etc
     View a combined daily schedule to understand what tasks need to be complted for all pets
 
-- What classes did you include, and what responsibilities did you assign to each?
+- 
     -Owner: owner's name
     -Pet: stores information about each pet
     -Task: for task, caring description due date
     -Scheduler: for scheduling
 
-Draft expansion: My three core actions are to add and manage pets, schedule care
+My three core actions are to add and manage pets, schedule care
 activities, and view a combined daily schedule. Owner manages a name and pets;
 Pet manages identifying information and tasks; Task represents one activity and
 its completion status; Scheduler combines tasks from every pet through Owner.
