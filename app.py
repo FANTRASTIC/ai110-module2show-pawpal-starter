@@ -64,12 +64,11 @@ with st.form("task_form"):
 pending = scheduler.filter_tasks(completed=False)
 if pending:
     with st.expander("Edit a pending task"):
+        task_labels = [f"{pet.name}: {task.description} ({task.due_date} {task.due_time:%H:%M})"
+                       for pet, task in pending]
         selected_index = st.selectbox(
             "Task to edit", range(len(pending)),
-            format_func=lambda index: (
-                f"{pending[index][0].name}: {pending[index][1].description} "
-                f"({pending[index][1].due_date} {pending[index][1].due_time:%H:%M})"
-            ),
+            format_func=lambda index: task_labels[index],
         )
         pet, original = pending[selected_index]
         with st.form(f"edit_task_{id(original)}"):
@@ -88,10 +87,18 @@ if pending:
             if st.form_submit_button("Save task"):
                 try:
                     updated = Task(title, new_day, new_time, int(minutes), new_priority, new_frequency)
-                    pet.tasks[pet.tasks.index(original)] = updated
-                    st.success("Task updated.")
+                    original.description = updated.description
+                    original.due_date = updated.due_date
+                    original.due_time = updated.due_time
+                    original.duration_minutes = updated.duration_minutes
+                    original.priority = updated.priority
+                    original.frequency = updated.frequency
+                    st.session_state.edit_message = "Task updated."
+                    st.rerun()
                 except ValueError as error:
                     st.error(str(error))
+        if "edit_message" in st.session_state:
+            st.success(st.session_state.pop("edit_message"))
 
 st.divider()
 st.subheader("Build Schedule")
