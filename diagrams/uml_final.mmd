@@ -1,0 +1,40 @@
+classDiagram
+    class Owner {
+        +str name
+        +list~Pet~ pets
+        +__post_init__()
+        +add_pet(pet)
+        +get_all_tasks() list
+    }
+    class Pet {
+        +str name
+        +str species
+        +list~Task~ tasks
+        +__post_init__()
+        +add_task(task)
+        +list_tasks() list
+    }
+    class Task {
+        +str description
+        +date due_date
+        +time due_time
+        +int duration_minutes
+        +str priority
+        +str frequency
+        +bool completed
+        +__post_init__()
+        +mark_complete()
+    }
+    class Scheduler {
+        +Owner owner
+        +get_schedule(start_date, end_date) list
+        +sort_by_time(tasks) list
+        +filter_tasks(pet_name, completed, tasks) list
+        +detect_conflicts(tasks) list
+        +mark_task_complete(task) Task
+    }
+    Owner "1" o-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : stores
+    Scheduler --> "1" Owner : retrieves all tasks
+    note for Owner "get_all_tasks returns (pet, task) pairs"
+    note for Scheduler "mark_task_complete returns the next recurring Task or None"

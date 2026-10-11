@@ -1,94 +1,181 @@
-# PawPal+ (Module 2 Project)
+﻿# PawPal+ (CodePath AI110 Project 2)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+PawPal+ is a Python pet-care scheduler with a Streamlit interface and a reproducible
+CLI demonstration. One owner can manage multiple pets, schedule and edit care
+activities, complete tasks, and view a combined daily schedule.
 
-## Scenario
+## Features
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+- Add pets with distinct names and record their species.
+- Add and edit pending tasks with a description, date, time, duration, priority,
+  and once/daily/weekly frequency.
+- View tasks in date/time order and filter by pet or completion status.
+- Warn about pending tasks with the same scheduled start across all pets.
+- Complete a recurring task to create its next incomplete occurrence.
+- Keep the owner, pets, and tasks in Streamlit session state across reruns.
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+Data lasts for the current browser session; there is no file or database storage.
+Priority and duration are displayed for the owner's judgment. The scheduler keeps
+chosen times; it does not optimize a time budget, reschedule conflicts, or detect
+overlapping durations with different start times.
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+## Architecture
 
-## What you will build
+| Class | Responsibility |
+|-------|----------------|
+| `Owner` | Stores a name and pets; `add_pet()` checks unique names; `get_all_tasks()` combines every pet's tasks. |
+| `Pet` | Stores name, species, and tasks; `add_task()` and `list_tasks()` manage the collection. |
+| `Task` | Stores description, due date/time, duration, priority, frequency, and completion; validates inputs and implements `mark_complete()`. |
+| `Scheduler` | Retrieves tasks through Owner, sorts and filters them, detects conflicts, and handles completion/recurrence. |
 
-Your final app should:
+Combined schedules use `(pet, task)` tuples, keeping ownership available for filters
+and warnings. Mutable collections have independent dataclass default factories.
+`Pet.list_tasks()` returns a list copy containing the stored task objects.
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+The initial design is in [uml_draft.mmd](diagrams/uml_draft.mmd). The final design is
+in [uml_final.mmd](diagrams/uml_final.mmd); [uml.mmd](diagrams/uml.mmd) contains the
+same final source for compatibility with the starter's filename.
+Both draft and final sources were rendered successfully with Mermaid CLI.
 
-## Getting started
+## Smarter Scheduling
 
-### Setup
+| Feature | Method | Behavior |
+|---------|--------|----------|
+| Chronological sorting | `Scheduler.sort_by_time(tasks=None)` | Uses `sorted()` with a date/time key. Equal starts retain insertion order. |
+| Filtering | `Scheduler.filter_tasks(pet_name=None, completed=None, tasks=None)` | Retrieves all pets' tasks by default; supports either filter or both together. Pet names match exactly. |
+| Daily/weekly recurrence | `Scheduler.mark_task_complete(task)` | Completes the stored task and adds a new task to the same pet, advancing by one or seven days with `timedelta`. |
+| Conflict detection | `Scheduler.detect_conflicts(tasks=None)` | Groups pending tasks by identical date/time and returns warnings with pet and task names. |
+| Daily/range retrieval | `Scheduler.get_schedule(start_date=None, end_date=None)` | Retrieves all stored tasks, one day, or an inclusive date range, sorted chronologically. |
 
-```bash
+Recurrence is generated on completion, rather than expanded into an infinite
+calendar. Attributes are preserved and the next occurrence starts incomplete.
+Repeated completion of the same task creates no duplicates. Use
+`Scheduler.mark_task_complete()` for the scheduling workflow:
+`Task.mark_complete()` alone only changes the status.
+Completed tasks remain available as history and are excluded from conflict warnings.
+Date/time values are local, without timezones.
+
+## Installation and setup
+
+Run commands from the repository root:
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-### Suggested workflow
+On macOS/Linux, activate with `source .venv/bin/activate`.
+If PowerShell activation is unavailable, use `.\.venv\Scripts\python.exe`
+in place of `python`. Dependencies are Streamlit and pytest; the backend uses
+only Python's standard library. Mermaid CLI was a temporary verification tool,
+not an application dependency.
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
+## Run the application
 
-## 🖥️ Sample Output
-
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
-
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+```powershell
+python -m streamlit run app.py
 ```
 
-## 🧪 Testing PawPal+
+Open the local URL printed by Streamlit, normally http://localhost:8501.
 
-```bash
-# Run the full test suite:
-pytest
+## CLI demonstration
 
-# Run with coverage:
-pytest --cov
+```powershell
+python main.py
 ```
 
-Sample test output:
+The demo inserts activities out of chronological order for Mochi and Luna.
+It uses the fixed date 2026-10-11 so the output is reproducible.
+This output was copied from an actual run:
 
+```text
+Today's Schedule (fixed demo date: 2026-10-11)
+  08:00 | Mochi: Breakfast (10 min, high, daily)
+  08:00 | Luna: Medication (5 min, high, once)
+  10:00 | Luna: Grooming (15 min, medium, weekly)
+  18:00 | Mochi: Evening walk (30 min, high, once)
+
+Pending tasks for Luna:
+  Luna: Medication
+  Luna: Grooming
+
+Conflict warnings:
+  Conflict on 2026-10-11 at 08:00: Mochi: Breakfast; Luna: Medication
+
+Completed Mochi's Breakfast.
+Next occurrence: 2026-10-12 at 08:00; completed=False
+After repeated completion: 3 tasks for Mochi (no duplicate).
 ```
-# Paste your pytest output here
+
+## Testing PawPal+
+
+Install dependencies with `python -m pip install -r requirements.txt`, then run:
+
+```powershell
+python -m pytest
 ```
 
-## 📐 Smarter Scheduling
+The 24 backend cases in `tests/test_pawpal.py` verify completion, addition,
+multi-pet retrieval, sorting dates before times, stable ties, pet/status/combined
+filters, daily and weekly recurrence across a year boundary, duplicate prevention,
+one-time tasks, exact-start conflicts, completed-task exclusion, empty collections,
+date ranges, ownership checks, separate collections, and input validation.
 
-> Fill in once you've implemented scheduling logic.
+Two Streamlit AppTest workflows in `tests/test_app.py` verify adding multiple pets,
+schedule sorting, warnings, filters, recurring completion, persistence across
+reruns, editing, and validation without losing existing data.
+These are functional interaction tests, rather than screenshot tests.
+No percentage coverage was measured.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+Actual successful output from the existing virtual environment:
 
-## 📸 Demo Walkthrough
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\haran\Documents\CODEPATH\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 26 items
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+tests\test_app.py ..                                                     [  7%]
+tests\test_pawpal.py ........................                            [100%]
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+============================= 26 passed in 2.70s ==============================
+```
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+Engineering confidence: **4/5 stars**. The core algorithms and real Streamlit
+script interactions pass. The server was launched successfully and its health
+endpoint returned HTTP 200. Manual browser visual verification remains pending
+because the agent's browser tool exposed no available browser. This rating is an
+AI-assisted assessment, not the student's personal rating or an official grade.
+
+## Demo Walkthrough
+
+1. Open **Owner details**, enter your name, and click **Save owner**.
+2. Under **Pets**, add Mochi as a dog, then Luna as a cat.
+3. Add Mochi's Evening walk at 18:00 and daily Breakfast at 08:00 on the same date.
+4. Add Luna's Medication at 08:00 on that date. Enter durations and priorities.
+5. Set **Schedule date** to that date and click **Generate schedule**. Breakfast
+   and Medication appear before Evening walk despite their insertion order.
+6. Observe the conflict warning naming both pets' 08:00 tasks. Warnings consider
+   all pets on the selected dates, even when the displayed rows are filtered.
+7. Choose Luna under **Filter by pet**, then try the **Completion status** filter.
+8. Restore **All pets** and **All**. Complete Mochi's Breakfast. Its status changes
+   to Completed and tomorrow's incomplete Breakfast is created.
+9. Check **Show all stored dates** to see tomorrow's occurrence. A weekly task
+   follows the same workflow and advances seven days.
+10. Use **Edit a pending task** to change a title, date, time, duration, priority,
+    or frequency. Blank titles produce an error and preserve the existing task.
+
+## Reflection and submission
+
+[reflection.md](reflection.md) preserves the original questions and student notes,
+adds factual implementation evidence, and labels proposed personal answers for review.
+[grading_audit.md](grading_audit.md) maps the six rubric categories to evidence.
+
+Before submission, review the reflection draft and perform the browser walkthrough.
+The intended repository is
+[FANTRASTIC/ai110-module2show-pawpal-starter](https://github.com/FANTRASTIC/ai110-module2show-pawpal-starter);
+GitHub's repository API confirmed that it is public. Submit through CodePath's
+Week 5 interface yourself. No assignment submission has been performed.
+Bonus criteria were not supplied, so no bonus score is claimed.
